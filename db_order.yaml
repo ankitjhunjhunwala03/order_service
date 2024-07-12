@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-order
+  template:
+    metadata:
+      labels:
+        app: db-order
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        env:
+        - name: POSTGRES_DB
+          value: order_db
+        - name: POSTGRES_USER
+          value: order_user
+        - name: POSTGRES_PASSWORD
+          value: order_pass
+        ports:
+        - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-order
+spec:
+  selector:
+    app: db-order
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  db_order:
+    image: postgres:13
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_pass
+    networks:
+      - ecommerce_network
+
+  order_service:
+    build:
+      context: .
+    command: ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8002"]
+    volumes:
+      - .:/app
+    ports:
+      - "8002:8002"
+    depends_on:
+      - db_order
+    restart: always
+    environment:
+      DB_NAME: "order_db"
+      DB_USER: "order_user"
+      DB_PASSWORD: "order_pass"
+      DB_HOST: db_order
+      DB_PORT: "5432"
+      AUTH_SERVICE_URL: "http://localhost:8000"
+      PRODUCT_SERVICE_URL: "http://localhost:8001"
+    networks:
+      - ecommerce_network
+
+networks:
+  ecommerce_network:
+    driver: bridge
